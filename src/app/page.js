@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
     Box,
     Stack,
@@ -9,15 +9,7 @@ import {
     Modal,
     TextField,
 } from "@mui/material";
-
-import { addItem, removeItem } from "../../utils/udpateInventory";
-import { firestore } from "./firebase";
-import {
-    collection,
-    getDocs,
-    query,
-
-} from "firebase/firestore";
+import { inventoryDataContext } from "../../utils/inventoryDataContext";
 
 const style = {
     position: "absolute",
@@ -36,24 +28,14 @@ const style = {
 
 export default function Home() {
     // States
-    const [inventory, setInventory] = useState([]);
+    const { inventoryData, handleAddition, handleDeletion, handleUpdate } =
+        useContext(inventoryDataContext);
     const [open, setOpen] = useState(false);
     const [itemName, setItemName] = useState("");
-  // Handles inventory updates
-  const updateInventory = async () => {
-          const snapshot = query(collection(firestore, "inventory"));
-          const docs = await getDocs(snapshot);
-          const inventoryList = [];
-          docs.forEach((doc) => {
-              inventoryList.push({ name: doc.id, ...doc.data() });
-          });
-          console.log(inventoryList);
-          setInventory(inventoryList);
-      };
-        
-  useEffect(() => {
-      updateInventory();
-  }, [open]);
+
+    useEffect(() => {
+        handleUpdate();
+    }, []);
     // Handle modal opeining and closing
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -89,9 +71,8 @@ export default function Home() {
                         />
                         <Button
                             variant="outlined"
-                            onClick={async() => {
-                              addItem(itemName);
-                              updateInventory();
+                            onClick={() => {
+                                handleAddition(itemName);
                                 setItemName("");
                                 handleClose();
                             }}>
@@ -123,7 +104,8 @@ export default function Home() {
                     height="300px"
                     spacing={2}
                     overflow={"auto"}>
-                    {inventory.map(({ name, quantity }) => (
+                    {console.log(inventoryData)}
+                    {inventoryData?.map(({ name, quantity }) => (
                         <Box
                             key={name}
                             width="100%"
@@ -147,10 +129,9 @@ export default function Home() {
                             </Typography>
                             <Button
                                 variant="contained"
-                          onClick={async() => {
-                            removeItem(name); 
-                            await updateInventory()
-                          }}>
+                                onClick={() => {
+                                    handleDeletion(name);
+                                }}>
                                 Remove
                             </Button>
                         </Box>
