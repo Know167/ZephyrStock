@@ -19,6 +19,11 @@ const InventoryPage = () => {
     const [itemName, setItemName] = useState("");
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const handleImage = async() => {
+        const res = await fetch('/api/imageRec')
+        const response=await JSON(res)
+        console.log(response)
+    } 
     const style = {
         position: "absolute",
         top: "50%",
